@@ -1,682 +1,724 @@
-import React, { useState } from 'react';
-import { ChevronRight, Award, Printer, BookOpen } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latein: Typische Übersetzungsfehler</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
 
-const LatinQuiz = () => {
-  const [stage, setStage] = useState('welcome');
-  const [username, setUsername] = useState('');
-  const [currentRound, setCurrentRound] = useState(0);
-  const [currentError, setCurrentError] = useState(0);
-  const [currentPhase, setCurrentPhase] = useState('teaching');
-  const [answers, setAnswers] = useState([]);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [learnings, setLearnings] = useState([]);
+    <script type="text/babel">
+        const { useState } = React;
 
-  const rounds = [
-    // Runde 1
-    [
-      {
-        errorType: "Ablativus absolutus",
-        color: "yellow",
-        teaching: {
-          latinParts: [
-            { text: "Caesare duce", highlight: true },
-            { text: ", milites victoriam reportaverunt.", highlight: false }
-          ],
-          options: [
-            "Caesar führte die Soldaten zum Sieg.",
-            "Unter Caesars Führung errangen die Soldaten den Sieg.",
-            "Caesar und die Führer errangen den Sieg der Soldaten.",
-            "Die Soldaten führten Caesar zum Sieg."
-          ],
-          correct: "Unter Caesars Führung errangen die Soldaten den Sieg.",
-          explanation: "Der Ablativus absolutus ('Caesare duce') ist eine eigenständige Partizipialkonstruktion im Ablativ. Er wird oft fälschlich als Subjekt übersetzt. Richtig ist: Er gibt die Begleitumstände an und wird mit 'unter/bei/während' übersetzt. 'Caesar' ist hier nicht das Subjekt des Hauptsatzes!"
-        },
-        verification: {
-          latinParts: [
-            { text: "Sole oriente", highlight: true },
-            { text: ", nautae navem paraverunt.", highlight: false }
-          ],
-          options: [
-            "Die Sonne ging auf und die Seeleute bereiteten das Schiff vor.",
-            "Bei Sonnenaufgang bereiteten die Seeleute das Schiff vor.",
-            "Die Seeleute bereiteten die aufgehende Sonne und das Schiff vor.",
-            "Die aufgehende Sonne bereitete das Schiff der Seeleute vor."
-          ],
-          correct: "Bei Sonnenaufgang bereiteten die Seeleute das Schiff vor.",
-          correctFeedback: "Sehr gut! Du hast erkannt, dass 'sole oriente' ein Ablativus absolutus ist und die Begleitumstände beschreibt, nicht das Subjekt.",
-          wrongFeedback: "Achtung! 'Sole oriente' ist wieder ein Ablativus absolutus (Ablativ + Partizip). Das Subjekt des Hauptsatzes sind die 'nautae', nicht 'sol'. Der Ablativ gibt nur die Begleitumstände an."
-        }
-      },
-      {
-        errorType: "Akkusativ mit Infinitiv (AcI)",
-        color: "blue",
-        teaching: {
-          latinParts: [
-            { text: "Scio ", highlight: false },
-            { text: "te esse bonum", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Ich weiß, dass du gut bist.",
-            "Ich weiß dich, gut zu sein.",
-            "Ich weiß deine Güte.",
-            "Du weißt, dass ich gut bin."
-          ],
-          correct: "Ich weiß, dass du gut bist.",
-          explanation: "Der AcI (Akkusativ mit Infinitiv) wird im Deutschen als Nebensatz mit 'dass' übersetzt. 'te' (Akkusativ) wird zum Subjekt des Nebensatzes, 'esse' zum Verb. Ein häufiger Fehler ist, den Akkusativ als direktes Objekt zu verstehen oder wörtlich zu übersetzen."
-        },
-        verification: {
-          latinParts: [
-            { text: "Audio ", highlight: false },
-            { text: "eum cantare", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Ich höre ihn singen.",
-            "Ich höre, dass er singt.",
-            "Ich höre seinen Gesang.",
-            "Er hört mich singen."
-          ],
-          correct: "Ich höre, dass er singt.",
-          correctFeedback: "Perfekt! Du hast den AcI richtig als 'dass'-Satz übersetzt. 'eum' (Akkusativ) wurde zum Subjekt des Nebensatzes.",
-          wrongFeedback: "Hier liegt wieder ein AcI vor: 'eum cantare'. Im Deutschen brauchen wir einen 'dass'-Satz: 'Ich höre, dass er singt.' Der Akkusativ 'eum' wird zum Subjekt des Nebensatzes, nicht zum Objekt von 'audio'."
-        }
-      },
-      {
-        errorType: "Partizip Perfekt Passiv (PPP)",
-        color: "green",
-        teaching: {
-          latinParts: [
-            { text: "Urbem ", highlight: false },
-            { text: "captam", highlight: true },
-            { text: " incenderunt.", highlight: false }
-          ],
-          options: [
-            "Sie verbrannten die Stadt, die erobert worden war.",
-            "Sie eroberten und verbrannten die Stadt.",
-            "Die eroberte Stadt verbrannte sie.",
-            "Sie eroberten die verbrannte Stadt."
-          ],
-          correct: "Sie verbrannten die Stadt, die erobert worden war.",
-          explanation: "Das PPP 'captam' ist ein Partizip Perfekt Passiv und drückt Vorzeitigkeit und Passiv aus. 'die eroberte Stadt' = 'die Stadt, die (zuvor) erobert worden war'. Ein häufiger Fehler ist, das PPP nur als Adjektiv zu verstehen und die Vorzeitigkeit zu ignorieren."
-        },
-        verification: {
-          latinParts: [
-            { text: "Litteras ", highlight: false },
-            { text: "scriptas", highlight: true },
-            { text: " legerunt.", highlight: false }
-          ],
-          options: [
-            "Sie schrieben die gelesenen Briefe.",
-            "Sie lasen die Briefe, die geschrieben worden waren.",
-            "Die geschriebenen Briefe lasen sich.",
-            "Sie schrieben und lasen Briefe."
-          ],
-          correct: "Sie lasen die Briefe, die geschrieben worden waren.",
-          correctFeedback: "Ausgezeichnet! Das PPP 'scriptas' hast du korrekt mit Vorzeitigkeit und Passiv übersetzt: 'die (zuvor) geschrieben worden waren'.",
-          wrongFeedback: "Das PPP 'scriptas' drückt Vorzeitigkeit und Passiv aus. Die Briefe wurden zuerst geschrieben, dann gelesen. Richtig: 'Sie lasen die Briefe, die geschrieben worden waren.'"
-        }
-      }
-    ],
-    // Runde 2
-    [
-      {
-        errorType: "Konjunktiv im cum-Satz",
-        color: "purple",
-        teaching: {
-          latinParts: [
-            { text: "Cum hostes venissent", highlight: true },
-            { text: ", cives fugerunt.", highlight: false }
-          ],
-          options: [
-            "Obwohl die Feinde gekommen waren, flohen die Bürger.",
-            "Als die Feinde gekommen waren, flohen die Bürger.",
-            "Während die Feinde kamen, flohen die Bürger.",
-            "Wenn die Feinde kommen würden, würden die Bürger fliehen."
-          ],
-          correct: "Als die Feinde gekommen waren, flohen die Bürger.",
-          explanation: "Cum mit Konjunktiv Plusquamperfekt (venissent) ist ein cum historicum und bedeutet 'als' (temporal-kausal). Viele verwechseln es mit cum concessivum (obwohl). Die Zeitenfolge ist wichtig: Plusquamperfekt drückt Vorzeitigkeit aus."
-        },
-        verification: {
-          latinParts: [
-            { text: "Cum nox venisset", highlight: true },
-            { text: ", domum redierunt.", highlight: false }
-          ],
-          options: [
-            "Obwohl die Nacht gekommen war, kehrten sie nach Hause zurück.",
-            "Als die Nacht gekommen war, kehrten sie nach Hause zurück.",
-            "Wenn die Nacht käme, würden sie nach Hause zurückkehren.",
-            "Während die Nacht kam, kehrten sie nach Hause zurück."
-          ],
-          correct: "Als die Nacht gekommen war, kehrten sie nach Hause zurück.",
-          correctFeedback: "Richtig! Cum + Konjunktiv Plusquamperfekt = 'als' (cum historicum). Du hast die temporale Bedeutung und die Vorzeitigkeit erkannt.",
-          wrongFeedback: "Auch hier: cum + Konjunktiv Plusquamperfekt (venisset) = cum historicum = 'als'. Die Nacht kam zuerst (Vorzeitigkeit), dann kehrten sie heim."
-        }
-      },
-      {
-        errorType: "Relativsatz mit Konjunktiv",
-        color: "pink",
-        teaching: {
-          latinParts: [
-            { text: "Misit nuntios ", highlight: false },
-            { text: "qui pacem peterent", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Er schickte Boten, die Frieden forderten.",
-            "Er schickte Boten, damit sie Frieden forderten.",
-            "Er schickte Boten, welche den Frieden forderten.",
-            "Er schickte friedliche Boten."
-          ],
-          correct: "Er schickte Boten, damit sie Frieden forderten.",
-          explanation: "Der Konjunktiv im Relativsatz (peterent) macht daraus einen Finalsatz (Absicht/Zweck). 'qui...peterent' = 'damit sie...forderten'. Im Deutschen oft mit 'um zu' oder 'damit' übersetzt. Bei Indikativ wäre es ein normaler Relativsatz."
-        },
-        verification: {
-          latinParts: [
-            { text: "Legatos misit ", highlight: false },
-            { text: "qui de pace agerent", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Er schickte Gesandte, die über Frieden verhandelten.",
-            "Er schickte Gesandte, um über Frieden zu verhandeln.",
-            "Er schickte friedliche Gesandte.",
-            "Die Gesandten, die er schickte, verhandelten."
-          ],
-          correct: "Er schickte Gesandte, um über Frieden zu verhandeln.",
-          correctFeedback: "Perfekt! Der Konjunktiv 'agerent' zeigt, dass der Relativsatz final ist: Er schickte sie mit dem Zweck/der Absicht zu verhandeln.",
-          wrongFeedback: "Der Konjunktiv 'agerent' im Relativsatz drückt Absicht aus (Finalsatz). Richtig: 'Er schickte Gesandte, um über Frieden zu verhandeln' oder 'damit sie über Frieden verhandelten'."
-        }
-      },
-      {
-        errorType: "Genitivus obiectivus",
-        color: "orange",
-        teaching: {
-          latinParts: [
-            { text: "Amor ", highlight: false },
-            { text: "patriae", highlight: true },
-            { text: " nos ducit.", highlight: false }
-          ],
-          options: [
-            "Die Liebe der Heimat führt uns.",
-            "Die Liebe zur Heimat führt uns.",
-            "Unsere Liebe führt die Heimat.",
-            "Die väterliche Liebe führt uns."
-          ],
-          correct: "Die Liebe zur Heimat führt uns.",
-          explanation: "Bei Gefühls- und Handlungsbegriffen ist der Genitiv meist ein Genitivus obiectivus: 'patriae' ist das Objekt der Liebe, nicht der Besitzer. 'amor patriae' = 'Liebe zur Heimat' (nicht: 'Liebe der Heimat'). Die Heimat liebt nicht, sondern wird geliebt."
-        },
-        verification: {
-          latinParts: [
-            { text: "Timor ", highlight: false },
-            { text: "hostium", highlight: true },
-            { text: " milites terruit.", highlight: false }
-          ],
-          options: [
-            "Die Furcht der Feinde erschreckte die Soldaten.",
-            "Die Furcht vor den Feinden erschreckte die Soldaten.",
-            "Die Soldaten erschreckten die ängstlichen Feinde.",
-            "Die feindliche Furcht erschreckte die Soldaten."
-          ],
-          correct: "Die Furcht vor den Feinden erschreckte die Soldaten.",
-          correctFeedback: "Exzellent! 'Timor hostium' ist Genitivus obiectivus: Die Feinde sind das Objekt der Furcht, nicht die Fürchtenden. Man fürchtet sich vor ihnen.",
-          wrongFeedback: "'Hostium' ist Genitivus obiectivus bei 'timor'. Die Feinde sind nicht diejenigen, die Furcht haben, sondern das Objekt der Furcht. Richtig: 'Die Furcht vor den Feinden'."
-        }
-      }
-    ],
-    // Runde 3
-    [
-      {
-        errorType: "Participium coniunctum (PC)",
-        color: "cyan",
-        teaching: {
-          latinParts: [
-            { text: "Caesar profectus est milites ", highlight: false },
-            { text: "hortatus", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Caesar brach auf und ermunterte die Soldaten.",
-            "Caesar brach auf, nachdem er die Soldaten ermuntert hatte.",
-            "Die ermutigten Soldaten brachen mit Caesar auf.",
-            "Caesar ermunterte die aufbrechenden Soldaten."
-          ],
-          correct: "Caesar brach auf, nachdem er die Soldaten ermuntert hatte.",
-          explanation: "Das PC 'hortatus' ist ein Partizip Perfekt mit dem Subjekt verbunden. Es drückt Vorzeitigkeit aus: Die Handlung des Partizips geschah VOR der Haupthandlung. 'Hortatus' (nachdem er ermuntert hatte) → dann 'profectus est' (brach er auf)."
-        },
-        verification: {
-          latinParts: [
-            { text: "Dux ", highlight: false },
-            { text: "locutus", highlight: true },
-            { text: " milites dimisit.", highlight: false }
-          ],
-          options: [
-            "Der Anführer sprach und entließ die Soldaten.",
-            "Der sprechende Anführer entließ die Soldaten.",
-            "Der Anführer entließ die Soldaten, nachdem er gesprochen hatte.",
-            "Die Soldaten entließen den sprechenden Anführer."
-          ],
-          correct: "Der Anführer entließ die Soldaten, nachdem er gesprochen hatte.",
-          correctFeedback: "Hervorragend! Das PC 'locutus' zeigt Vorzeitigkeit: Erst sprach er, dann entließ er die Soldaten.",
-          wrongFeedback: "'Locutus' ist ein PC im Perfekt und drückt Vorzeitigkeit aus. Die Rede kam zeitlich VOR der Entlassung. Richtig: 'nachdem er gesprochen hatte, entließ er...'"
-        }
-      },
-      {
-        errorType: "Präposition in + Ablativ vs. Akkusativ",
-        color: "red",
-        teaching: {
-          latinParts: [
-            { text: "In ", highlight: false },
-            { text: "urbem", highlight: true },
-            { text: " ierunt.", highlight: false }
-          ],
-          options: [
-            "Sie gingen in der Stadt.",
-            "Sie gingen in die Stadt.",
-            "Sie gingen aus der Stadt.",
-            "In der Stadt gingen sie."
-          ],
-          correct: "Sie gingen in die Stadt.",
-          explanation: "'In' mit Akkusativ (urbem) drückt Richtung/Bewegung aus: 'in...hinein, nach'. 'In' mit Ablativ (urbe) drückt Ort/Ruhe aus: 'in...drin'. Merke: Wohin? → Akkusativ. Wo? → Ablativ. Ein häufiger Verwechslungsfehler!"
-        },
-        verification: {
-          latinParts: [
-            { text: "In ", highlight: false },
-            { text: "silva", highlight: true },
-            { text: " ambulabant.", highlight: false }
-          ],
-          options: [
-            "Sie gingen in den Wald.",
-            "Sie spazierten im Wald.",
-            "Sie spazierten aus dem Wald.",
-            "Der Wald spazierte."
-          ],
-          correct: "Sie spazierten im Wald.",
-          correctFeedback: "Richtig! 'In' + Ablativ (silva) = Ort, wo man sich befindet: 'im Wald'. Keine Bewegung dorthin.",
-          wrongFeedback: "'In' + Ablativ (silva) bedeutet 'wo?', nicht 'wohin?'. Sie waren bereits im Wald und spazierten dort. Akkusativ wäre für 'in den Wald hinein' nötig."
-        }
-      },
-      {
-        errorType: "Deponentien",
-        color: "indigo",
-        teaching: {
-          latinParts: [
-            { text: "Hostes ", highlight: false },
-            { text: "sequimur", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Wir werden von den Feinden verfolgt.",
-            "Wir verfolgen die Feinde.",
-            "Die Feinde verfolgen uns.",
-            "Wir und die Feinde werden verfolgt."
-          ],
-          correct: "Wir verfolgen die Feinde.",
-          explanation: "'Sequi' ist ein Deponens: passiv in der Form, aber aktiv in der Bedeutung. 'Sequimur' sieht aus wie Passiv ('wir werden verfolgt'), bedeutet aber aktiv 'wir verfolgen'. Deponentien sind eine häufige Fehlerquelle, weil man sie für Passiv hält!"
-        },
-        verification: {
-          latinParts: [
-            { text: "Magistratus populum ", highlight: false },
-            { text: "hortatus est", highlight: true },
-            { text: ".", highlight: false }
-          ],
-          options: [
-            "Der Magistrat wurde vom Volk ermuntert.",
-            "Der Magistrat ermunterte das Volk.",
-            "Das Volk ermunterte den Magistrat.",
-            "Der Magistrat und das Volk wurden ermuntert."
-          ],
-          correct: "Der Magistrat ermunterte das Volk.",
-          correctFeedback: "Ausgezeichnet! 'Hortari' ist ein Deponens. 'Hortatus est' ist zwar passive Form, bedeutet aber aktiv 'er ermunterte'.",
-          wrongFeedback: "'Hortari' (ermuntern) ist ein Deponens: passive Form, aktive Bedeutung. 'Hortatus est' = 'er ermunterte' (aktiv), nicht 'er wurde ermuntert'."
-        }
-      }
-    ]
-  ];
+        const ChevronRight = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        );
 
-  const getColorClasses = (color) => {
-    const colorMap = {
-      'yellow': { bg: 'bg-yellow-50', border: 'border-yellow-600', highlight: 'bg-yellow-200', label: 'bg-yellow-200' },
-      'blue': { bg: 'bg-blue-50', border: 'border-blue-600', highlight: 'bg-blue-200', label: 'bg-blue-200' },
-      'green': { bg: 'bg-green-50', border: 'border-green-600', highlight: 'bg-green-200', label: 'bg-green-200' },
-      'purple': { bg: 'bg-purple-50', border: 'border-purple-600', highlight: 'bg-purple-200', label: 'bg-purple-200' },
-      'pink': { bg: 'bg-pink-50', border: 'border-pink-600', highlight: 'bg-pink-200', label: 'bg-pink-200' },
-      'orange': { bg: 'bg-orange-50', border: 'border-orange-600', highlight: 'bg-orange-200', label: 'bg-orange-200' },
-      'cyan': { bg: 'bg-cyan-50', border: 'border-cyan-600', highlight: 'bg-cyan-200', label: 'bg-cyan-200' },
-      'red': { bg: 'bg-red-50', border: 'border-red-600', highlight: 'bg-red-200', label: 'bg-red-200' },
-      'indigo': { bg: 'bg-indigo-50', border: 'border-indigo-600', highlight: 'bg-indigo-200', label: 'bg-indigo-200' }
-    };
-    return colorMap[color] || colorMap['red'];
-  };
+        const Award = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+        );
 
-  const handleStart = () => {
-    if (username.trim()) {
-      setStage('quiz');
-    }
-  };
+        const Printer = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+        );
 
-  const handleAnswer = (answer) => {
-    setSelectedAnswer(answer);
-    setShowFeedback(true);
+        const BookOpen = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+        );
 
-    const currentData = rounds[currentRound][currentError];
-    const textData = currentPhase === 'teaching' ? currentData.teaching : currentData.verification;
-    const isCorrect = answer === textData.correct;
+        const LatinQuiz = () => {
+            const [stage, setStage] = useState('welcome');
+            const [username, setUsername] = useState('');
+            const [currentRound, setCurrentRound] = useState(0);
+            const [currentError, setCurrentError] = useState(0);
+            const [currentPhase, setCurrentPhase] = useState('teaching');
+            const [answers, setAnswers] = useState([]);
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [learnings, setLearnings] = useState([]);
 
-    if (currentPhase === 'teaching') {
-      setAnswers([...answers, {
-        phase: 'teaching',
-        errorType: currentData.errorType,
-        correct: isCorrect
-      }]);
-    } else {
-      setAnswers([...answers, {
-        phase: 'verification',
-        errorType: currentData.errorType,
-        correct: isCorrect
-      }]);
+            const rounds = [
+                // Runde 1
+                [
+                    {
+                        errorType: "Ablativus absolutus",
+                        color: "yellow",
+                        teaching: {
+                            latinParts: [
+                                { text: "Caesare duce", highlight: true },
+                                { text: ", milites victoriam reportaverunt.", highlight: false }
+                            ],
+                            options: [
+                                "Caesar führte die Soldaten zum Sieg.",
+                                "Unter Caesars Führung errangen die Soldaten den Sieg.",
+                                "Caesar und die Führer errangen den Sieg der Soldaten.",
+                                "Die Soldaten führten Caesar zum Sieg."
+                            ],
+                            correct: "Unter Caesars Führung errangen die Soldaten den Sieg.",
+                            explanation: "Der Ablativus absolutus ('Caesare duce') ist eine eigenständige Partizipialkonstruktion im Ablativ. Er wird oft fälschlich als Subjekt übersetzt. Richtig ist: Er gibt die Begleitumstände an und wird mit 'unter/bei/während' übersetzt. 'Caesar' ist hier nicht das Subjekt des Hauptsatzes!"
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Sole oriente", highlight: true },
+                                { text: ", nautae navem paraverunt.", highlight: false }
+                            ],
+                            options: [
+                                "Die Sonne ging auf und die Seeleute bereiteten das Schiff vor.",
+                                "Bei Sonnenaufgang bereiteten die Seeleute das Schiff vor.",
+                                "Die Seeleute bereiteten die aufgehende Sonne und das Schiff vor.",
+                                "Die aufgehende Sonne bereitete das Schiff der Seeleute vor."
+                            ],
+                            correct: "Bei Sonnenaufgang bereiteten die Seeleute das Schiff vor.",
+                            correctFeedback: "Sehr gut! Du hast erkannt, dass 'sole oriente' ein Ablativus absolutus ist und die Begleitumstände beschreibt, nicht das Subjekt.",
+                            wrongFeedback: "Achtung! 'Sole oriente' ist wieder ein Ablativus absolutus (Ablativ + Partizip). Das Subjekt des Hauptsatzes sind die 'nautae', nicht 'sol'. Der Ablativ gibt nur die Begleitumstände an."
+                        }
+                    },
+                    {
+                        errorType: "Akkusativ mit Infinitiv (AcI)",
+                        color: "blue",
+                        teaching: {
+                            latinParts: [
+                                { text: "Scio ", highlight: false },
+                                { text: "te esse bonum", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Ich weiß, dass du gut bist.",
+                                "Ich weiß dich, gut zu sein.",
+                                "Ich weiß deine Güte.",
+                                "Du weißt, dass ich gut bin."
+                            ],
+                            correct: "Ich weiß, dass du gut bist.",
+                            explanation: "Der AcI (Akkusativ mit Infinitiv) wird im Deutschen als Nebensatz mit 'dass' übersetzt. 'te' (Akkusativ) wird zum Subjekt des Nebensatzes, 'esse' zum Verb. Ein häufiger Fehler ist, den Akkusativ als direktes Objekt zu verstehen oder wörtlich zu übersetzen."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Audio ", highlight: false },
+                                { text: "eum cantare", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Ich höre ihn singen.",
+                                "Ich höre, dass er singt.",
+                                "Ich höre seinen Gesang.",
+                                "Er hört mich singen."
+                            ],
+                            correct: "Ich höre, dass er singt.",
+                            correctFeedback: "Perfekt! Du hast den AcI richtig als 'dass'-Satz übersetzt. 'eum' (Akkusativ) wurde zum Subjekt des Nebensatzes.",
+                            wrongFeedback: "Hier liegt wieder ein AcI vor: 'eum cantare'. Im Deutschen brauchen wir einen 'dass'-Satz: 'Ich höre, dass er singt.' Der Akkusativ 'eum' wird zum Subjekt des Nebensatzes, nicht zum Objekt von 'audio'."
+                        }
+                    },
+                    {
+                        errorType: "Partizip Perfekt Passiv (PPP)",
+                        color: "green",
+                        teaching: {
+                            latinParts: [
+                                { text: "Urbem ", highlight: false },
+                                { text: "captam", highlight: true },
+                                { text: " incenderunt.", highlight: false }
+                            ],
+                            options: [
+                                "Sie verbrannten die Stadt, die erobert worden war.",
+                                "Sie eroberten und verbrannten die Stadt.",
+                                "Die eroberte Stadt verbrannte sie.",
+                                "Sie eroberten die verbrannte Stadt."
+                            ],
+                            correct: "Sie verbrannten die Stadt, die erobert worden war.",
+                            explanation: "Das PPP 'captam' ist ein Partizip Perfekt Passiv und drückt Vorzeitigkeit und Passiv aus. 'die eroberte Stadt' = 'die Stadt, die (zuvor) erobert worden war'. Ein häufiger Fehler ist, das PPP nur als Adjektiv zu verstehen und die Vorzeitigkeit zu ignorieren."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Litteras ", highlight: false },
+                                { text: "scriptas", highlight: true },
+                                { text: " legerunt.", highlight: false }
+                            ],
+                            options: [
+                                "Sie schrieben die gelesenen Briefe.",
+                                "Sie lasen die Briefe, die geschrieben worden waren.",
+                                "Die geschriebenen Briefe lasen sich.",
+                                "Sie schrieben und lasen Briefe."
+                            ],
+                            correct: "Sie lasen die Briefe, die geschrieben worden waren.",
+                            correctFeedback: "Ausgezeichnet! Das PPP 'scriptas' hast du korrekt mit Vorzeitigkeit und Passiv übersetzt: 'die (zuvor) geschrieben worden waren'.",
+                            wrongFeedback: "Das PPP 'scriptas' drückt Vorzeitigkeit und Passiv aus. Die Briefe wurden zuerst geschrieben, dann gelesen. Richtig: 'Sie lasen die Briefe, die geschrieben worden waren.'"
+                        }
+                    }
+                ],
+                // Runde 2
+                [
+                    {
+                        errorType: "Konjunktiv im cum-Satz",
+                        color: "purple",
+                        teaching: {
+                            latinParts: [
+                                { text: "Cum hostes venissent", highlight: true },
+                                { text: ", cives fugerunt.", highlight: false }
+                            ],
+                            options: [
+                                "Obwohl die Feinde gekommen waren, flohen die Bürger.",
+                                "Als die Feinde gekommen waren, flohen die Bürger.",
+                                "Während die Feinde kamen, flohen die Bürger.",
+                                "Wenn die Feinde kommen würden, würden die Bürger fliehen."
+                            ],
+                            correct: "Als die Feinde gekommen waren, flohen die Bürger.",
+                            explanation: "Cum mit Konjunktiv Plusquamperfekt (venissent) ist ein cum historicum und bedeutet 'als' (temporal-kausal). Viele verwechseln es mit cum concessivum (obwohl). Die Zeitenfolge ist wichtig: Plusquamperfekt drückt Vorzeitigkeit aus."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Cum nox venisset", highlight: true },
+                                { text: ", domum redierunt.", highlight: false }
+                            ],
+                            options: [
+                                "Obwohl die Nacht gekommen war, kehrten sie nach Hause zurück.",
+                                "Als die Nacht gekommen war, kehrten sie nach Hause zurück.",
+                                "Wenn die Nacht käme, würden sie nach Hause zurückkehren.",
+                                "Während die Nacht kam, kehrten sie nach Hause zurück."
+                            ],
+                            correct: "Als die Nacht gekommen war, kehrten sie nach Hause zurück.",
+                            correctFeedback: "Richtig! Cum + Konjunktiv Plusquamperfekt = 'als' (cum historicum). Du hast die temporale Bedeutung und die Vorzeitigkeit erkannt.",
+                            wrongFeedback: "Auch hier: cum + Konjunktiv Plusquamperfekt (venisset) = cum historicum = 'als'. Die Nacht kam zuerst (Vorzeitigkeit), dann kehrten sie heim."
+                        }
+                    },
+                    {
+                        errorType: "Relativsatz mit Konjunktiv",
+                        color: "pink",
+                        teaching: {
+                            latinParts: [
+                                { text: "Misit nuntios ", highlight: false },
+                                { text: "qui pacem peterent", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Er schickte Boten, die Frieden forderten.",
+                                "Er schickte Boten, damit sie Frieden forderten.",
+                                "Er schickte Boten, welche den Frieden forderten.",
+                                "Er schickte friedliche Boten."
+                            ],
+                            correct: "Er schickte Boten, damit sie Frieden forderten.",
+                            explanation: "Der Konjunktiv im Relativsatz (peterent) macht daraus einen Finalsatz (Absicht/Zweck). 'qui...peterent' = 'damit sie...forderten'. Im Deutschen oft mit 'um zu' oder 'damit' übersetzt. Bei Indikativ wäre es ein normaler Relativsatz."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Legatos misit ", highlight: false },
+                                { text: "qui de pace agerent", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Er schickte Gesandte, die über Frieden verhandelten.",
+                                "Er schickte Gesandte, um über Frieden zu verhandeln.",
+                                "Er schickte friedliche Gesandte.",
+                                "Die Gesandten, die er schickte, verhandelten."
+                            ],
+                            correct: "Er schickte Gesandte, um über Frieden zu verhandeln.",
+                            correctFeedback: "Perfekt! Der Konjunktiv 'agerent' zeigt, dass der Relativsatz final ist: Er schickte sie mit dem Zweck/der Absicht zu verhandeln.",
+                            wrongFeedback: "Der Konjunktiv 'agerent' im Relativsatz drückt Absicht aus (Finalsatz). Richtig: 'Er schickte Gesandte, um über Frieden zu verhandeln' oder 'damit sie über Frieden verhandelten'."
+                        }
+                    },
+                    {
+                        errorType: "Genitivus obiectivus",
+                        color: "orange",
+                        teaching: {
+                            latinParts: [
+                                { text: "Amor ", highlight: false },
+                                { text: "patriae", highlight: true },
+                                { text: " nos ducit.", highlight: false }
+                            ],
+                            options: [
+                                "Die Liebe der Heimat führt uns.",
+                                "Die Liebe zur Heimat führt uns.",
+                                "Unsere Liebe führt die Heimat.",
+                                "Die väterliche Liebe führt uns."
+                            ],
+                            correct: "Die Liebe zur Heimat führt uns.",
+                            explanation: "Bei Gefühls- und Handlungsbegriffen ist der Genitiv meist ein Genitivus obiectivus: 'patriae' ist das Objekt der Liebe, nicht der Besitzer. 'amor patriae' = 'Liebe zur Heimat' (nicht: 'Liebe der Heimat'). Die Heimat liebt nicht, sondern wird geliebt."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Timor ", highlight: false },
+                                { text: "hostium", highlight: true },
+                                { text: " milites terruit.", highlight: false }
+                            ],
+                            options: [
+                                "Die Furcht der Feinde erschreckte die Soldaten.",
+                                "Die Furcht vor den Feinden erschreckte die Soldaten.",
+                                "Die Soldaten erschreckten die ängstlichen Feinde.",
+                                "Die feindliche Furcht erschreckte die Soldaten."
+                            ],
+                            correct: "Die Furcht vor den Feinden erschreckte die Soldaten.",
+                            correctFeedback: "Exzellent! 'Timor hostium' ist Genitivus obiectivus: Die Feinde sind das Objekt der Furcht, nicht die Fürchtenden. Man fürchtet sich vor ihnen.",
+                            wrongFeedback: "'Hostium' ist Genitivus obiectivus bei 'timor'. Die Feinde sind nicht diejenigen, die Furcht haben, sondern das Objekt der Furcht. Richtig: 'Die Furcht vor den Feinden'."
+                        }
+                    }
+                ],
+                // Runde 3
+                [
+                    {
+                        errorType: "Participium coniunctum (PC)",
+                        color: "cyan",
+                        teaching: {
+                            latinParts: [
+                                { text: "Caesar profectus est milites ", highlight: false },
+                                { text: "hortatus", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Caesar brach auf und ermunterte die Soldaten.",
+                                "Caesar brach auf, nachdem er die Soldaten ermuntert hatte.",
+                                "Die ermutigten Soldaten brachen mit Caesar auf.",
+                                "Caesar ermunterte die aufbrechenden Soldaten."
+                            ],
+                            correct: "Caesar brach auf, nachdem er die Soldaten ermuntert hatte.",
+                            explanation: "Das PC 'hortatus' ist ein Partizip Perfekt mit dem Subjekt verbunden. Es drückt Vorzeitigkeit aus: Die Handlung des Partizips geschah VOR der Haupthandlung. 'Hortatus' (nachdem er ermuntert hatte) → dann 'profectus est' (brach er auf)."
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Dux ", highlight: false },
+                                { text: "locutus", highlight: true },
+                                { text: " milites dimisit.", highlight: false }
+                            ],
+                            options: [
+                                "Der Anführer sprach und entließ die Soldaten.",
+                                "Der sprechende Anführer entließ die Soldaten.",
+                                "Der Anführer entließ die Soldaten, nachdem er gesprochen hatte.",
+                                "Die Soldaten entließen den sprechenden Anführer."
+                            ],
+                            correct: "Der Anführer entließ die Soldaten, nachdem er gesprochen hatte.",
+                            correctFeedback: "Hervorragend! Das PC 'locutus' zeigt Vorzeitigkeit: Erst sprach er, dann entließ er die Soldaten.",
+                            wrongFeedback: "'Locutus' ist ein PC im Perfekt und drückt Vorzeitigkeit aus. Die Rede kam zeitlich VOR der Entlassung. Richtig: 'nachdem er gesprochen hatte, entließ er...'"
+                        }
+                    },
+                    {
+                        errorType: "Präposition in + Ablativ vs. Akkusativ",
+                        color: "red",
+                        teaching: {
+                            latinParts: [
+                                { text: "In ", highlight: false },
+                                { text: "urbem", highlight: true },
+                                { text: " ierunt.", highlight: false }
+                            ],
+                            options: [
+                                "Sie gingen in der Stadt.",
+                                "Sie gingen in die Stadt.",
+                                "Sie gingen aus der Stadt.",
+                                "In der Stadt gingen sie."
+                            ],
+                            correct: "Sie gingen in die Stadt.",
+                            explanation: "'In' mit Akkusativ (urbem) drückt Richtung/Bewegung aus: 'in...hinein, nach'. 'In' mit Ablativ (urbe) drückt Ort/Ruhe aus: 'in...drin'. Merke: Wohin? → Akkusativ. Wo? → Ablativ. Ein häufiger Verwechslungsfehler!"
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "In ", highlight: false },
+                                { text: "silva", highlight: true },
+                                { text: " ambulabant.", highlight: false }
+                            ],
+                            options: [
+                                "Sie gingen in den Wald.",
+                                "Sie spazierten im Wald.",
+                                "Sie spazierten aus dem Wald.",
+                                "Der Wald spazierte."
+                            ],
+                            correct: "Sie spazierten im Wald.",
+                            correctFeedback: "Richtig! 'In' + Ablativ (silva) = Ort, wo man sich befindet: 'im Wald'. Keine Bewegung dorthin.",
+                            wrongFeedback: "'In' + Ablativ (silva) bedeutet 'wo?', nicht 'wohin?'. Sie waren bereits im Wald und spazierten dort. Akkusativ wäre für 'in den Wald hinein' nötig."
+                        }
+                    },
+                    {
+                        errorType: "Deponentien",
+                        color: "indigo",
+                        teaching: {
+                            latinParts: [
+                                { text: "Hostes ", highlight: false },
+                                { text: "sequimur", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Wir werden von den Feinden verfolgt.",
+                                "Wir verfolgen die Feinde.",
+                                "Die Feinde verfolgen uns.",
+                                "Wir und die Feinde werden verfolgt."
+                            ],
+                            correct: "Wir verfolgen die Feinde.",
+                            explanation: "'Sequi' ist ein Deponens: passiv in der Form, aber aktiv in der Bedeutung. 'Sequimur' sieht aus wie Passiv ('wir werden verfolgt'), bedeutet aber aktiv 'wir verfolgen'. Deponentien sind eine häufige Fehlerquelle, weil man sie für Passiv hält!"
+                        },
+                        verification: {
+                            latinParts: [
+                                { text: "Magistratus populum ", highlight: false },
+                                { text: "hortatus est", highlight: true },
+                                { text: ".", highlight: false }
+                            ],
+                            options: [
+                                "Der Magistrat wurde vom Volk ermuntert.",
+                                "Der Magistrat ermunterte das Volk.",
+                                "Das Volk ermunterte den Magistrat.",
+                                "Der Magistrat und das Volk wurden ermuntert."
+                            ],
+                            correct: "Der Magistrat ermunterte das Volk.",
+                            correctFeedback: "Ausgezeichnet! 'Hortari' ist ein Deponens. 'Hortatus est' ist zwar passive Form, bedeutet aber aktiv 'er ermunterte'.",
+                            wrongFeedback: "'Hortari' (ermuntern) ist ein Deponens: passive Form, aktive Bedeutung. 'Hortatus est' = 'er ermunterte' (aktiv), nicht 'er wurde ermuntert'."
+                        }
+                    }
+                ]
+            ];
 
-      if (isCorrect) {
-        setLearnings([...learnings, {
-          errorType: currentData.errorType,
-          explanation: currentData.teaching.explanation
-        }]);
-      }
-    }
-  };
+            const getColorClasses = (color) => {
+                const colorMap = {
+                    'yellow': { bg: 'bg-yellow-50', border: 'border-yellow-600', highlight: 'bg-yellow-200', label: 'bg-yellow-200' },
+                    'blue': { bg: 'bg-blue-50', border: 'border-blue-600', highlight: 'bg-blue-200', label: 'bg-blue-200' },
+                    'green': { bg: 'bg-green-50', border: 'border-green-600', highlight: 'bg-green-200', label: 'bg-green-200' },
+                    'purple': { bg: 'bg-purple-50', border: 'border-purple-600', highlight: 'bg-purple-200', label: 'bg-purple-200' },
+                    'pink': { bg: 'bg-pink-50', border: 'border-pink-600', highlight: 'bg-pink-200', label: 'bg-pink-200' },
+                    'orange': { bg: 'bg-orange-50', border: 'border-orange-600', highlight: 'bg-orange-200', label: 'bg-orange-200' },
+                    'cyan': { bg: 'bg-cyan-50', border: 'border-cyan-600', highlight: 'bg-cyan-200', label: 'bg-cyan-200' },
+                    'red': { bg: 'bg-red-50', border: 'border-red-600', highlight: 'bg-red-200', label: 'bg-red-200' },
+                    'indigo': { bg: 'bg-indigo-50', border: 'border-indigo-600', highlight: 'bg-indigo-200', label: 'bg-indigo-200' }
+                };
+                return colorMap[color] || colorMap['red'];
+            };
 
-  const handleNext = () => {
-    setShowFeedback(false);
-    setSelectedAnswer(null);
+            const handleStart = () => {
+                if (username.trim()) {
+                    setStage('quiz');
+                }
+            };
 
-    if (currentPhase === 'teaching') {
-      setCurrentPhase('verification');
-    } else {
-      setCurrentPhase('teaching');
-      
-      if (currentError < rounds[currentRound].length - 1) {
-        setCurrentError(currentError + 1);
-      } else if (currentRound < rounds.length - 1) {
-        setCurrentRound(currentRound + 1);
-        setCurrentError(0);
-      } else {
-        setStage('certificate');
-      }
-    }
-  };
+            const handleAnswer = (answer) => {
+                setSelectedAnswer(answer);
+                setShowFeedback(true);
 
-  const handlePrint = () => {
-    window.print();
-  };
+                const currentData = rounds[currentRound][currentError];
+                const textData = currentPhase === 'teaching' ? currentData.teaching : currentData.verification;
+                const isCorrect = answer === textData.correct;
 
-  const correctAnswers = answers.filter(a => a.correct).length;
-  const totalAnswers = answers.length;
+                if (currentPhase === 'teaching') {
+                    setAnswers([...answers, {
+                        phase: 'teaching',
+                        errorType: currentData.errorType,
+                        correct: isCorrect
+                    }]);
+                } else {
+                    setAnswers([...answers, {
+                        phase: 'verification',
+                        errorType: currentData.errorType,
+                        correct: isCorrect
+                    }]);
 
-  if (stage === 'welcome') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 p-8">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-xl p-8">
-          <div className="flex items-center justify-center mb-6">
-            <BookOpen className="w-12 h-12 text-red-600 mr-4" />
-            <h1 className="text-4xl font-bold text-gray-800">
-              Latein: Typische Übersetzungsfehler
-            </h1>
-          </div>
-          <div className="prose prose-lg mb-8">
-            <p className="text-gray-700">
-              Willkommen! Dieses Tool hilft dir, häufige Übersetzungsfehler im Lateinischen 
-              zu erkennen und zu vermeiden.
-            </p>
-            <p className="text-gray-700">
-              <strong>So funktioniert es:</strong> Du bekommst lateinische Texte mit typischen 
-              Fehlerquellen. Nach deiner ersten Übersetzung erfährst du, wo die Schwierigkeit liegt. 
-              Danach folgt ein ähnlicher Text, um zu prüfen, ob du den Hinweis verstanden hast.
-            </p>
-            <div className="bg-red-50 p-4 rounded-lg my-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Aufbau:
-              </h3>
-              <ul className="list-disc list-inside space-y-1 text-gray-700">
-                <li><strong>3 Runden</strong> mit verschiedenen Fehlerquellen</li>
-                <li>Pro Runde: <strong>3 typische Fehlerquellen</strong></li>
-                <li>Pro Fehlerquelle: <strong>2 Texte</strong> (Lehrtext + Überprüfung)</li>
-                <li>Nach jeder Antwort: Ausführliche Erklärung</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <label className="block">
-              <span className="text-gray-700 font-semibold">Dein Name für das Zertifikat:</span>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Gib deinen Namen ein"
-              />
-            </label>
-            <button
-              onClick={handleStart}
-              disabled={!username.trim()}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-            >
-              Lernen starten <ChevronRight />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+                    if (isCorrect) {
+                        setLearnings([...learnings, {
+                            errorType: currentData.errorType,
+                            explanation: currentData.teaching.explanation
+                        }]);
+                    }
+                }
+            };
 
-  if (stage === 'quiz') {
-    const currentData = rounds[currentRound][currentError];
-    const textData = currentPhase === 'teaching' ? currentData.teaching : currentData.verification;
-    const isTeaching = currentPhase === 'teaching';
-    const isCorrect = selectedAnswer === textData.correct;
-    const colors = getColorClasses(currentData.color);
+            const handleNext = () => {
+                setShowFeedback(false);
+                setSelectedAnswer(null);
 
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 p-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-lg shadow-xl p-8">
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Runde {currentRound + 1} von {rounds.length}</span>
-                <span>Fehlerquelle {currentError + 1} von {rounds[currentRound].length}</span>
-              </div>
-              <div className="mb-2">
-                <span className={`inline-block ${colors.label} text-gray-800 px-3 py-1 rounded-full text-sm font-semibold`}>
-                  {currentData.errorType}
-                </span>
-                {!isTeaching && (
-                  <span className="ml-2 inline-block bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">
-                    Überprüfung
-                  </span>
-                )}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-red-600 h-2 rounded-full transition-all"
-                  style={{ 
-                    width: `${((currentRound * rounds[currentRound].length * 2 + currentError * 2 + (isTeaching ? 0 : 1)) / (rounds.length * 3 * 2)) * 100}%` 
-                  }}
-                />
-              </div>
-            </div>
+                if (currentPhase === 'teaching') {
+                    setCurrentPhase('verification');
+                } else {
+                    setCurrentPhase('teaching');
+                    
+                    if (currentError < rounds[currentRound].length - 1) {
+                        setCurrentError(currentError + 1);
+                    } else if (currentRound < rounds.length - 1) {
+                        setCurrentRound(currentRound + 1);
+                        setCurrentError(0);
+                    } else {
+                        setStage('certificate');
+                    }
+                }
+            };
 
-            <div className={`${colors.bg} p-6 rounded-lg mb-8 border-l-4 ${colors.border}`}>
-              <p className="text-2xl text-gray-800 font-serif mb-2">
-                {textData.latinParts.map((part, idx) => (
-                  part.highlight ? (
-                    <span key={idx} className={`${colors.highlight} px-1 rounded font-bold`}>
-                      {part.text}
-                    </span>
-                  ) : (
-                    <span key={idx}>{part.text}</span>
-                  )
-                ))}
-              </p>
-              <p className="text-sm text-gray-600 italic">
-                {isTeaching ? 'Wähle die korrekte Übersetzung:' : 'Hast du die Fehlerquelle verstanden?'}
-              </p>
-            </div>
+            const handlePrint = () => {
+                window.print();
+            };
 
-            {!showFeedback ? (
-              <div className="space-y-3">
-                {textData.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswer(option)}
-                    className="w-full text-left px-6 py-4 bg-white border-2 border-gray-300 rounded-lg hover:border-red-500 hover:bg-red-50 transition"
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className={`p-6 rounded-lg ${isCorrect ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'}`}>
-                  <h3 className={`text-xl font-bold mb-3 ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
-                    {isCorrect ? '✓ Richtig!' : '✗ Nicht korrekt'}
-                  </h3>
-                  {!isCorrect && (
-                    <p className="text-gray-700 mb-3">
-                      Die korrekte Übersetzung: <strong>{textData.correct}</strong>
-                    </p>
-                  )}
-                  <div className={`bg-white p-4 rounded border-l-4 ${colors.border}`}>
-                    <p className="text-sm font-semibold text-gray-700 mb-2">
-                      {isTeaching ? 'Erklärung der Fehlerquelle:' : isCorrect ? 'Sehr gut!' : 'Noch einmal:'}
-                    </p>
-                    <p className="text-gray-700 leading-relaxed">
-                      {isTeaching ? textData.explanation : isCorrect ? textData.correctFeedback : textData.wrongFeedback}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleNext}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-                >
-                  {isTeaching ? 'Zur Überprüfung' : 'Weiter'} <ChevronRight />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (stage === 'certificate') {
-    const teachingCorrect = answers.filter(a => a.phase === 'teaching' && a.correct).length;
-    const verificationCorrect = answers.filter(a => a.phase === 'verification' && a.correct).length;
-    const totalTeaching = answers.filter(a => a.phase === 'teaching').length;
-    const totalVerification = answers.filter(a => a.phase === 'verification').length;
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-2xl p-12 certificate-page">
-            <div className="text-center mb-8">
-              <Award className="w-20 h-20 text-red-600 mx-auto mb-4" />
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                Lernzertifikat
-              </h1>
-              <p className="text-xl text-gray-600">
-                Latein: Typische Übersetzungsfehler
-              </p>
-            </div>
-
-            <div className="border-t-2 border-b-2 border-red-600 py-6 mb-8 text-center">
-              <p className="text-lg text-gray-700 mb-2">
-                Hiermit wird bestätigt, dass
-              </p>
-              <p className="text-3xl font-bold text-gray-800 mb-2">
-                {username}
-              </p>
-              <p className="text-lg text-gray-700">
-                das Latein-Lerntool absolviert hat
-              </p>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Deine Ergebnisse:
-              </h2>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-red-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Erste Texte (Lernen)</p>
-                  <p className="text-2xl font-bold text-gray-800">
-                    {teachingCorrect} / {totalTeaching}
-                  </p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Überprüfungen</p>
-                  <p className="text-2xl font-bold text-gray-800">
-                    {verificationCorrect} / {totalVerification}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Behandelte Fehlerquellen:
-              </h2>
-              <div className="space-y-4">
-                {learnings.map((learning, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-red-600">
-                    <p className="font-semibold text-gray-800 mb-2">
-                      {learning.errorType}
-                    </p>
-                    <p className="text-gray-700 text-sm">
-                      {learning.explanation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-center text-gray-600 text-sm mb-6">
-              <p>{new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-
-            <div className="flex gap-4 no-print">
-              <button
-                onClick={handlePrint}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-              >
-                <Printer /> Zertifikat drucken
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition"
-              >
-                Neu starten
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <style>{`
-          @media print {
-            .no-print {
-              display: none !important;
+            if (stage === 'welcome') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 p-8">
+                        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-xl p-8">
+                            <div className="flex items-center justify-center mb-6">
+                                <BookOpen className="w-12 h-12 text-red-600 mr-4" />
+                                <h1 className="text-4xl font-bold text-gray-800">
+                                    Latein: Typische Übersetzungsfehler
+                                </h1>
+                            </div>
+                            <div className="prose prose-lg mb-8">
+                                <p className="text-gray-700">
+                                    Willkommen! Dieses Tool hilft dir, häufige Übersetzungsfehler im Lateinischen 
+                                    zu erkennen und zu vermeiden.
+                                </p>
+                                <p className="text-gray-700">
+                                    <strong>So funktioniert es:</strong> Du bekommst lateinische Texte mit typischen 
+                                    Fehlerquellen. Nach deiner ersten Übersetzung erfährst du, wo die Schwierigkeit liegt. 
+                                    Danach folgt ein ähnlicher Text, um zu prüfen, ob du den Hinweis verstanden hast.
+                                </p>
+                                <div className="bg-red-50 p-4 rounded-lg my-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                        Aufbau:
+                                    </h3>
+                                    <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                        <li><strong>3 Runden</strong> mit verschiedenen Fehlerquellen</li>
+                                        <li>Pro Runde: <strong>3 typische Fehlerquellen</strong></li>
+                                        <li>Pro Fehlerquelle: <strong>2 Texte</strong> (Lehrtext + Überprüfung)</li>
+                                        <li>Nach jeder Antwort: Ausführliche Erklärung</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <label className="block">
+                                    <span className="text-gray-700 font-semibold">Dein Name für das Zertifikat:</span>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        placeholder="Gib deinen Namen ein"
+                                    />
+                                </label>
+                                <button
+                                    onClick={handleStart}
+                                    disabled={!username.trim()}
+                                    className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
+                                >
+                                    Lernen starten <ChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
             }
-            .certificate-page {
-              box-shadow: none !important;
-              page-break-after: avoid;
-            }
-            body {
-              background: white !important;
-            }
-          }
-        `}</style>
-      </div>
-    );
-  }
-};
 
-export default LatinQuiz;
+            if (stage === 'quiz') {
+                const currentData = rounds[currentRound][currentError];
+                const textData = currentPhase === 'teaching' ? currentData.teaching : currentData.verification;
+                const isTeaching = currentPhase === 'teaching';
+                const isCorrect = selectedAnswer === textData.correct;
+                const colors = getColorClasses(currentData.color);
+
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 p-8">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="bg-white rounded-lg shadow-xl p-8">
+                                <div className="mb-6">
+                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Runde {currentRound + 1} von {rounds.length}</span>
+                                        <span>Fehlerquelle {currentError + 1} von {rounds[currentRound].length}</span>
+                                    </div>
+                                    <div className="mb-2">
+                                        <span className={`inline-block ${colors.label} text-gray-800 px-3 py-1 rounded-full text-sm font-semibold`}>
+                                            {currentData.errorType}
+                                        </span>
+                                        {!isTeaching && (
+                                            <span className="ml-2 inline-block bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                                Überprüfung
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div 
+                                            className="bg-red-600 h-2 rounded-full transition-all"
+                                            style={{ 
+                                                width: `${((currentRound * rounds[currentRound].length * 2 + currentError * 2 + (isTeaching ? 0 : 1)) / (rounds.length * 3 * 2)) * 100}%` 
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={`${colors.bg} p-6 rounded-lg mb-8 border-l-4 ${colors.border}`}>
+                                    <p className="text-2xl text-gray-800 font-serif mb-2">
+                                        {textData.latinParts.map((part, idx) => (
+                                            part.highlight ? (
+                                                <span key={idx} className={`${colors.highlight} px-1 rounded font-bold`}>
+                                                    {part.text}
+                                                </span>
+                                            ) : (
+                                                <span key={idx}>{part.text}</span>
+                                            )
+                                        ))}
+                                    </p>
+                                    <p className="text-sm text-gray-600 italic">
+                                        {isTeaching ? 'Wähle die korrekte Übersetzung:' : 'Hast du die Fehlerquelle verstanden?'}
+                                    </p>
+                                </div>
+
+                                {!showFeedback ? (
+                                    <div className="space-y-3">
+                                        {textData.options.map((option, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleAnswer(option)}
+                                                className="w-full text-left px-6 py-4 bg-white border-2 border-gray-300 rounded-lg hover:border-red-500 hover:bg-red-50 transition"
+                                            >
+                                                {option}
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className={`p-6 rounded-lg ${isCorrect ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'}`}>
+                                            <h3 className={`text-xl font-bold mb-3 ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                                                {isCorrect ? '✓ Richtig!' : '✗ Nicht korrekt'}
+                                            </h3>
+                                            {!isCorrect && (
+                                                <p className="text-gray-700 mb-3">
+                                                    Die korrekte Übersetzung: <strong>{textData.correct}</strong>
+                                                </p>
+                                            )}
+                                            <div className={`bg-white p-4 rounded border-l-4 ${colors.border}`}>
+                                                <p className="text-sm font-semibold text-gray-700 mb-2">
+                                                    {isTeaching ? 'Erklärung der Fehlerquelle:' : isCorrect ? 'Sehr gut!' : 'Noch einmal:'}
+                                                </p>
+                                                <p className="text-gray-700 leading-relaxed">
+                                                    {isTeaching ? textData.explanation : isCorrect ? textData.correctFeedback : textData.wrongFeedback}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={handleNext}
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
+                                        >
+                                            {isTeaching ? 'Zur Überprüfung' : 'Weiter'} <ChevronRight />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (stage === 'certificate') {
+                const teachingCorrect = answers.filter(a => a.phase === 'teaching' && a.correct).length;
+                const verificationCorrect = answers.filter(a => a.phase === 'verification' && a.correct).length;
+                const totalTeaching = answers.filter(a => a.phase === 'teaching').length;
+                const totalVerification = answers.filter(a => a.phase === 'verification').length;
+
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-white rounded-lg shadow-2xl p-12 certificate-page">
+                                <div className="text-center mb-8">
+                                    <Award className="w-20 h-20 text-red-600 mx-auto mb-4" />
+                                    <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                                        Lernzertifikat
+                                    </h1>
+                                    <p className="text-xl text-gray-600">
+                                        Latein: Typische Übersetzungsfehler
+                                    </p>
+                                </div>
+
+                                <div className="border-t-2 border-b-2 border-red-600 py-6 mb-8 text-center">
+                                    <p className="text-lg text-gray-700 mb-2">
+                                        Hiermit wird bestätigt, dass
+                                    </p>
+                                    <p className="text-3xl font-bold text-gray-800 mb-2">
+                                        {username}
+                                    </p>
+                                    <p className="text-lg text-gray-700">
+                                        das Latein-Lerntool absolviert hat
+                                    </p>
+                                </div>
+
+                                <div className="mb-8">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                                        Deine Ergebnisse:
+                                    </h2>
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="bg-red-50 p-4 rounded-lg">
+                                            <p className="text-sm text-gray-600 mb-1">Erste Texte (Lernen)</p>
+                                            <p className="text-2xl font-bold text-gray-800">
+                                                {teachingCorrect} / {totalTeaching}
+                                            </p>
+                                        </div>
+                                        <div className="bg-purple-50 p-4 rounded-lg">
+                                            <p className="text-sm text-gray-600 mb-1">Überprüfungen</p>
+                                            <p className="text-2xl font-bold text-gray-800">
+                                                {verificationCorrect} / {totalVerification}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                                        Behandelte Fehlerquellen:
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {learnings.map((learning, index) => (
+                                            <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-red-600">
+                                                <p className="font-semibold text-gray-800 mb-2">
+                                                    {learning.errorType}
+                                                </p>
+                                                <p className="text-gray-700 text-sm">
+                                                    {learning.explanation}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="text-center text-gray-600 text-sm mb-6">
+                                    <p>{new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                </div>
+
+                                <div className="flex gap-4 no-print">
+                                    <button
+                                        onClick={handlePrint}
+                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition"
+                                    >
+                                        <Printer /> Zertifikat drucken
+                                    </button>
+                                    <button
+                                        onClick={() => window.location.reload()}
+                                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition"
+                                    >
+                                        Neu starten
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <style>{`
+                            @media print {
+                                .no-print {
+                                    display: none !important;
+                                }
+                                .certificate-page {
+                                    box-shadow: none !important;
+                                    page-break-after: avoid;
+                                }
+                                body {
+                                    background: white !important;
+                                }
+                            }
+                        `}</style>
+                    </div>
+                );
+            }
+        };
+
+        ReactDOM.render(<LatinQuiz />, document.getElementById('root'));
+    </script>
+</body>
+</html>
